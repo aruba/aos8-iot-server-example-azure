@@ -1,0 +1,272 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+var {app, pgPool} = require('../app');
+const config = require('../config');
+const pg = require('pg');
+var debug = require('debug')('backend:server');
+var http = require('http');
+const axios = require('axios');
+const EventHubReader = require('../scripts/event-hub-reader.js');
+const WebSocket = require('ws');
+
+// read environment variables
+const iotHubConnectionString = process.env.IotHubConnectionString;
+if (!iotHubConnectionString) {
+  console.error(`Environment variable IotHubConnectionString must be specified.`);
+  return;
+}
+const eventHubConsumerGroup = process.env.EventHubConsumerGroup;
+if (!eventHubConsumerGroup) {
+  console.error(`Environment variable EventHubConsumerGroup must be specified.`);
+  return;
+}
+console.log(`Using IoT Hub connection string [${iotHubConnectionString}]`);
+console.log(`Using event hub consumer group [${eventHubConsumerGroup}]`);
+
+let today = new Date();
+let dd = today.getDate();
+let mm = today.getMonth() + 1;
+let yyyy = today.getFullYear();
+if (dd < 10) {
+  dd = '0' + dd;
+}
+if (mm < 10) {
+  mm = '0' + mm;
+}
+today = mm + '/' + dd + '/' + yyyy;
+
+/**
+ * Get port from environment and store in Express.
+ */
+const port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+const server = http.createServer(app);
+
+const wss = new WebSocket.Server({ server });
+wss.on('connection', socket => {
+  console.log('client connection to websocket');
+});
+
+wss.broadcast = (data) => {
+  console.log('broadcast: ', data);
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      try {
+        console.log(`Broadcasting data ${data}`);
+        client.send(data);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  });
+};
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+pgPool.connect((err, pgListener, release) => {
+  if (err) {
+    return console.error('Error acquiring client', err.stack)
+  }
+  const query = pgListener.query('LISTEN new_azurepgmsg');
+
+  pgListener.on('notification', async (data) => {
+    //const payload = JSON.parse(data.payload);
+    console.log('row added!', data.payload);
+    wss.broadcast(data.payload);
+  })
+})
+
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+function normalizePort(val) {
+  let port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  let bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+function onListening() {
+  let addr = server.address();
+  let bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
+
+function handleQuery(query, client) {
+  return new Promise((resolve, reject) => {
+    client.query(query, (err, res) => {
+      if (err) {
+        console.log(err.stack);
+        reject(err);
+      } else {
+        resolve("row inserted");
+      }
+    })
+  })
+}
+
+async function handlePromises(arr_of_queries, client, release) {
+  let array_of_promises = [];
+
+  arr_of_queries.forEach( item => {
+    array_of_promises.push(handleQuery(item, client));
+  });
+
+  await Promise.all(array_of_promises).then(release());
+}
+
+const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsumerGroup);
+(async () => {
+  await eventHubReader.startReadMessage((props, message, date, deviceId) => {
+    try {
+      console.log("props: ", props);
+      console.log("message: ", message);
+      console.log("date: ", date);
+      console.log("deviceID: ", deviceId);
+
+      tmpdate = JSON.parse(JSON.stringify({"testdate": date})).testdate
+
+      pgPool.connect((err, client, release) => {
+        if (err) {
+          return console.error('Error acquiring client', err.stack)
+        }
+
+        let queries = [];
+
+        if (props.messageType === "bleData") {
+          // handle bledata message
+          queryTs = `
+          INSERT INTO tsdatahypertable (date, time, device, rssi, ble_data, frame_type, mac_addr_type, ap)
+          VALUES ('` + today + `', '` + tmpdate + `', '` + props.deviceIdentifier + `', '` + message.bleData[0].rssi + `', '` + message.bleData[0].data + `', '` + message.bleFrameType + `', '` + message.macAddrType + `', '` + deviceId + `');`;
+
+          queryBle = `
+          INSERT INTO bledevtable (device_identifier, access_points)
+          VALUES ('` + props.deviceIdentifier + `', '{` + deviceId + `}')
+          ON CONFLICT (device_identifier)
+          DO
+          UPDATE SET access_points = (SELECT ARRAY_AGG(DISTINCT e) FROM UNNEST(bledevtable.access_points || '{` + deviceId +`}') e)
+          WHERE NOT bledevtable.access_points @> '{` + deviceId +`}' AND bledevtable.device_identifier = '` + props.deviceIdentifier + `';`;
+
+          queryAp = `
+            INSERT INTO aptable (device_id, last_health_status, usb_devices, radio_devices, ble_devices)
+            VALUES ('` + deviceId + `', 'unknown', '{}', '{}', '{` + props.deviceIdentifier + `}')
+            ON CONFLICT (device_id)
+            DO
+            UPDATE SET ble_devices = (SELECT ARRAY_AGG(DISTINCT e) FROM UNNEST(aptable.ble_devices || '{` + props.deviceIdentifier+`}') e) 
+            WHERE NOT aptable.ble_devices @> '{` + props.deviceIdentifier +`}' AND aptable.device_id = '` + deviceId + `';`;
+
+          queries.push(queryTs, queryBle, queryAp);
+        } else {
+          // handle health check
+          queryHealth = `
+            INSERT INTO aptable (device_id, last_health_status, usb_devices, radio_devices, ble_devices)
+            VALUES ('` + deviceId + `', '`+ message.apStatus +`', '{}', '{}', '{}')
+            ON CONFLICT (device_id)
+            DO
+            UPDATE SET last_health_status = '` + message.apStatus + `'
+            WHERE aptable.device_id='` + deviceId + `';`;
+
+          queries.push(queryHealth);
+
+          if (message.hasOwnProperty('radio')) {
+            queryApRadio = `
+            INSERT INTO aptable (device_id, last_health_status, usb_devices, radio_devices, ble_devices)
+            VALUES ('` + deviceId + `', 'unknown', '{}', '{` + message.radio[0].mac + `}', '{}')
+            ON CONFLICT (device_id)
+            DO
+            UPDATE SET radio_devices = (SELECT ARRAY_AGG(DISTINCT e) FROM UNNEST(aptable.radio_devices || '{` + message.radio[0].mac +`}') e) 
+            WHERE NOT aptable.radio_devices @> '{` + message.radio[0].mac +`}' AND aptable.device_id = '` + deviceId + `';`;
+
+            queryRadio = `
+              INSERT INTO radiotable (mac_addr, type, firmware, last_health_status, external)
+              VALUES ('` + message.radio[0].mac + `', '` + message.radio[0].iotRadioType + `', '` + message.radio[0].iotRadioFirmware + `', '` + message.radio[0].healthStatus + `', '` + message.radio[0].external + `')
+              ON CONFLICT (mac_addr)
+              DO
+              UPDATE SET type = '` + message.radio[0].iotRadioType + `', firmware = '` + message.radio[0].iotRadioFirmware + `', last_health_status = '` + message.radio[0].healthStatus + `', external = '` + message.radio[0].external + `'
+              WHERE radiotable.mac_addr = '` + message.radio[0].mac + `';`;
+
+            queries.push(queryApRadio, queryRadio);
+          }
+
+          if (message.hasOwnProperty('usbDevice')) {
+            queryApUsb = `
+            INSERT INTO aptable (device_id, last_health_status, usb_devices, radio_devices, ble_devices)
+            VALUES ('` + deviceId + `', 'unknown', '{` + message.usbDevice[0].identifier + `}', '{}', '{}')
+            ON CONFLICT (device_id)
+            DO
+            UPDATE SET radio_devices = (SELECT ARRAY_AGG(DISTINCT e) FROM UNNEST(aptable.radio_devices || '{` + message.usbDevice[0].identifier +`}') e) 
+            WHERE NOT aptable.radio_devices @> '{` + message.usbDevice[0].identifier +`}' AND aptable.device_id = '` + deviceId + `';`;
+
+            queryUsb = `
+              INSERT INTO usbtable (id, last_health_status)
+              VALUES ('` + message.usbDevice[0].identifier + `', '` + message.usbDevice[0].healthStatus + `')
+              ON CONFLICT (id)
+              DO
+              UPDATE SET last_health_status = '` + message.usbDevice[0].healthStatus + `'
+              WHERE usbtable.id = '` + message.usbDevice[0].identifier + `';`;
+
+            queries.push(queryApUsb, queryUsb);
+          }
+        }
+
+        handlePromises(queries, client, release);
+      });
+    } catch (err) {
+      console.error('Error: [%s] from [%s].', err, message);
+    }
+  });
+})().catch();
