@@ -146,29 +146,6 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-function handleQuery(query, client) {
-  return new Promise((resolve, reject) => {
-    client.query(query, (err, res) => {
-      if (err) {
-        console.log(err.stack);
-        reject(err);
-      } else {
-        resolve("row inserted");
-      }
-    })
-  })
-}
-
-async function handlePromises(arr_of_queries, client, release) {
-  let array_of_promises = [];
-
-  arr_of_queries.forEach( item => {
-    array_of_promises.push(handleQuery(item, client));
-  });
-
-  await Promise.all(array_of_promises).then(release());
-}
-
 const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsumerGroup);
 (async () => {
   await eventHubReader.startReadMessage((props, message, date, deviceId) => {
@@ -180,18 +157,19 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
 
       tmpdate = JSON.parse(JSON.stringify({"testdate": date})).testdate
 
-      pgPool.connect((err, client, release) => {
-        if (err) {
-          return console.error('Error acquiring client', err.stack)
-        }
-
-        let queries = [];
-
-        if (props.messageType === "bleData") {
+      if (props.messageType === "bleData") {
           // handle bledata message
           queryTs = `
           INSERT INTO tsdatahypertable (date, time, device, rssi, ble_data, frame_type, mac_addr_type, ap)
           VALUES ('` + today + `', '` + tmpdate + `', '` + props.deviceIdentifier + `', '` + message.bleData[0].rssi + `', '` + message.bleData[0].data + `', '` + message.bleFrameType + `', '` + message.macAddrType + `', '` + deviceId + `');`;
+
+          pgPool.query(queryTs, (err, res) => {
+             if (err) {
+               console.error(err);
+               return;
+             }
+             console.log('Data insert successful');
+          });
 
           queryBle = `
           INSERT INTO bledevtable (device_identifier, access_points)
@@ -201,6 +179,14 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
           UPDATE SET access_points = (SELECT ARRAY_AGG(DISTINCT e) FROM UNNEST(bledevtable.access_points || '{` + deviceId +`}') e)
           WHERE NOT bledevtable.access_points @> '{` + deviceId +`}' AND bledevtable.device_identifier = '` + props.deviceIdentifier + `';`;
 
+          pgPool.query(queryBle, (err, res) => {
+             if (err) {
+               console.error(err);
+               return;
+             }
+             console.log('Data insert successful');
+          });
+
           queryAp = `
             INSERT INTO aptable (device_id, last_health_status, usb_devices, radio_devices, ble_devices)
             VALUES ('` + deviceId + `', 'unknown', '{}', '{}', '{` + props.deviceIdentifier + `}')
@@ -209,9 +195,16 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
             UPDATE SET ble_devices = (SELECT ARRAY_AGG(DISTINCT e) FROM UNNEST(aptable.ble_devices || '{` + props.deviceIdentifier+`}') e) 
             WHERE NOT aptable.ble_devices @> '{` + props.deviceIdentifier +`}' AND aptable.device_id = '` + deviceId + `';`;
 
-          queries.push(queryTs, queryBle, queryAp);
-        } else {
+          pgPool.query(queryAp, (err, res) => {
+             if (err) {
+               console.error(err);
+               return;
+             }
+             console.log('Data insert successful');
+          });
+      } else {
           // handle health check
+
           queryHealth = `
             INSERT INTO aptable (device_id, last_health_status, usb_devices, radio_devices, ble_devices)
             VALUES ('` + deviceId + `', '`+ message.apStatus +`', '{}', '{}', '{}')
@@ -220,7 +213,13 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
             UPDATE SET last_health_status = '` + message.apStatus + `'
             WHERE aptable.device_id='` + deviceId + `';`;
 
-          queries.push(queryHealth);
+          pgPool.query(queryHealth, (err, res) => {
+             if (err) {
+               console.error(err);
+               return;
+             }
+             console.log('Data insert successful');
+          });
 
           if (message.hasOwnProperty('radio')) {
             queryApRadio = `
@@ -231,6 +230,14 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
             UPDATE SET radio_devices = (SELECT ARRAY_AGG(DISTINCT e) FROM UNNEST(aptable.radio_devices || '{` + message.radio[0].mac +`}') e) 
             WHERE NOT aptable.radio_devices @> '{` + message.radio[0].mac +`}' AND aptable.device_id = '` + deviceId + `';`;
 
+            pgPool.query(queryApRadio, (err, res) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+              console.log('Data insert successful');
+            });
+
             queryRadio = `
               INSERT INTO radiotable (mac_addr, type, firmware, last_health_status, external)
               VALUES ('` + message.radio[0].mac + `', '` + message.radio[0].iotRadioType + `', '` + message.radio[0].iotRadioFirmware + `', '` + message.radio[0].healthStatus + `', '` + message.radio[0].external + `')
@@ -239,7 +246,13 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
               UPDATE SET type = '` + message.radio[0].iotRadioType + `', firmware = '` + message.radio[0].iotRadioFirmware + `', last_health_status = '` + message.radio[0].healthStatus + `', external = '` + message.radio[0].external + `'
               WHERE radiotable.mac_addr = '` + message.radio[0].mac + `';`;
 
-            queries.push(queryApRadio, queryRadio);
+            pgPool.query(queryRadio, (err, res) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+              console.log('Data insert successful');
+            });
           }
 
           if (message.hasOwnProperty('usbDevice')) {
@@ -251,6 +264,14 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
             UPDATE SET radio_devices = (SELECT ARRAY_AGG(DISTINCT e) FROM UNNEST(aptable.radio_devices || '{` + message.usbDevice[0].identifier +`}') e) 
             WHERE NOT aptable.radio_devices @> '{` + message.usbDevice[0].identifier +`}' AND aptable.device_id = '` + deviceId + `';`;
 
+            pgPool.query(queryApUsb, (err, res) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+              console.log('Data insert successful');
+            });
+
             queryUsb = `
               INSERT INTO usbtable (id, last_health_status)
               VALUES ('` + message.usbDevice[0].identifier + `', '` + message.usbDevice[0].healthStatus + `')
@@ -259,12 +280,15 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
               UPDATE SET last_health_status = '` + message.usbDevice[0].healthStatus + `'
               WHERE usbtable.id = '` + message.usbDevice[0].identifier + `';`;
 
-            queries.push(queryApUsb, queryUsb);
+            pgPool.query(queryUsb, (err, res) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+              console.log('Data insert successful');
+            });
           }
-        }
-
-        handlePromises(queries, client, release);
-      });
+      }
     } catch (err) {
       console.error('Error: [%s] from [%s].', err, message);
     }
