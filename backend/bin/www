@@ -13,12 +13,12 @@ const EventHubReader = require('../scripts/event-hub-reader.js');
 const WebSocket = require('ws');
 
 // read environment variables
-const iotHubConnectionString = process.env.IotHubConnectionString;
+const iotHubConnectionString = config.iothubconnectionstring;
 if (!iotHubConnectionString) {
   console.error(`Environment variable IotHubConnectionString must be specified.`);
   return;
 }
-const eventHubConsumerGroup = process.env.EventHubConsumerGroup;
+const eventHubConsumerGroup = config.eventhubconsumergroup;
 if (!eventHubConsumerGroup) {
   console.error(`Environment variable EventHubConsumerGroup must be specified.`);
   return;

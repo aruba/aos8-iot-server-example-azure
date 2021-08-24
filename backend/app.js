@@ -25,10 +25,28 @@ const pgConfig = {
 }
 
 const pgPool = new Pool(pgConfig)
-//const pgClient = new pg.Client(pgConfig)
-//pgPool.connect()
 
-const pgHandler = new postgresDbHandler(pgPool)
+// one client reserved for responding to endpoints
+//  -> the frontend should always have data to display
+pgPool.connect((err, queryHandler, release) => {
+    if (err) {
+        return console.error('Error acquiring client', err.stack)
+    }
+    const pgHandler = new postgresDbHandler(queryHandler)
+
+    app.get('/tabledata/:type', (req, res, next) => pgHandler.getAllData(req, res).catch(next))
+    app.post('/bledata', (req, res, next) => pgHandler.getBleDataAp(req, res).catch(next))
+    app.get('/chartdates', (req, res, next) => pgHandler.getChartDates(req, res).catch(next))
+    app.post('/chartaps', (req, res, next) => pgHandler.getChartAps(req, res).catch(next))
+    app.get('/dates', (req, res, next) => pgHandler.getDates(req, res).catch(next))
+    app.get('/approfile', (req, res, next) => pgHandler.getApProfile(req, res).catch(next))
+    app.get('/radioprofile', (req, res, next) => pgHandler.getRadioProfile(req, res).catch(next))
+    app.get('/usbprofile', (req, res, next) => pgHandler.getUsbProfile(req, res).catch(next))
+    app.post('/chart', (req, res, next) => pgHandler.getChartData(req, res).catch(next))
+    app.post('/tsdata', (req, res, next) => pgHandler.getTableData(req, res).catch(next))
+    app.post('/avgrssi', (req, res, next) => pgHandler.getAvgRssi(req, res).catch(next))
+})
+
 
 app.use(cors())
 app.use(logger('dev'))
@@ -40,19 +58,6 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.get('/', function (req, res, next) {
     res.render('Welcome to backend', {title: 'Express'});
 });
-
-app.post('/addmessage/:type', (req, res, next) => pgHandler.addData(req, res).catch(next))
-app.get('/tabledata/:type', (req, res, next) => pgHandler.getAllData(req, res).catch(next))
-app.post('/bledata', (req, res, next) => pgHandler.getBleDataAp(req, res).catch(next))
-app.get('/chartdates', (req, res, next) => pgHandler.getChartDates(req, res).catch(next))
-app.post('/chartaps', (req, res, next) => pgHandler.getChartAps(req, res).catch(next))
-app.get('/dates', (req, res, next) => pgHandler.getDates(req, res).catch(next))
-app.get('/approfile', (req, res, next) => pgHandler.getApProfile(req, res).catch(next))
-app.get('/radioprofile', (req, res, next) => pgHandler.getRadioProfile(req, res).catch(next))
-app.get('/usbprofile', (req, res, next) => pgHandler.getUsbProfile(req, res).catch(next))
-app.post('/chart', (req, res, next) => pgHandler.getChartData(req, res).catch(next))
-app.post('/tsdata', (req, res, next) => pgHandler.getTableData(req, res).catch(next))
-app.post('/avgrssi', (req, res, next) => pgHandler.getAvgRssi(req, res).catch(next))
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
