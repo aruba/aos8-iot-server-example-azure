@@ -3,11 +3,13 @@ const express = require('express')
 const path = require('path')
 const cors = require('cors')
 const logger = require('morgan')
-//const pg = require('pg');
 const { Pool } = require('pg')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const postgresDbHandler = require("./routes/postgresDbHandler");
+
+// set this to true to run set up queries for schema
+const dbsetup = true;
 
 const app = express()
 
@@ -46,6 +48,78 @@ pgPool.connect((err, queryHandler, release) => {
     app.post('/tsdata', (req, res, next) => pgHandler.getTableData(req, res).catch(next))
     app.post('/avgrssi', (req, res, next) => pgHandler.getAvgRssi(req, res).catch(next))
 })
+
+if (dbsetup) {
+    const queryTimescale = `CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;`;
+    pgPool.query(queryTimescale, (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log('timescale extension created');
+    });
+
+    const queryTsdatahypertable = `CREATE TABLE IF NOT EXISTS tsdatahypertable (time TIMESTAMPTZ NOT NULL, device TEXT NOT NULL, rssi SMALLINT NOT NULL, ble_data TEXT NOT NULL, frame_type TEXT NOT NULL, mac_addr_type TEXT NOT NULL, ap TEXT NOT NULL);`;
+    pgPool.query(queryTsdatahypertable, (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log('timeseries db table created');
+    });
+
+    const queryCreateHyperTable = `SELECT create_hypertable('tsdatahypertable', 'time', if_not_exists => TRUE);`;
+    pgPool.query(queryCreateHyperTable, (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log('db converted to timescale db');
+    });
+
+    const queryRadioTable = `CREATE TABLE IF NOT EXISTS radiotable (mac_addr TEXT PRIMARY KEY, type TEXT NOT NULL, firmware TEXT NOT NULL, last_health_status TEXT NOT NULL, external BOOLEAN NOT NULL);`;
+    pgPool.query(queryRadioTable, (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log('radio db table created');
+    });
+
+    const queryUsbTable = `CREATE TABLE IF NOT EXISTS usbtable (id TEXT PRIMARY KEY, last_health_status TEXT NOT NULL);`;
+    pgPool.query(queryUsbTable, (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log('usb db table created');
+    });
+
+    const queryApTable = `CREATE TABLE IF NOT EXISTS aptable (device_id TEXT PRIMARY KEY, last_health_status TEXT NOT NULL, usb_devices TEXT[] NOT NULL, TEXT[] NOT NULL, ble_devices TEXT[] NOT NULL);`;
+    pgPool.query(queryApTable, (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log('ap db table created');
+    });
+
+    const queryBleTable = `CREATE TABLE bledevtable (device_identifier TEXT PRIMARY KEY, access_points TEXT[] NOT NULL);`;
+    pgPool.query(queryBleTable, (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log('ble db table created');
+    });
+}
 
 
 app.use(cors())
