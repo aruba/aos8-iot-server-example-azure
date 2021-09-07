@@ -83,7 +83,7 @@ export default {
     };
   },
   mounted: function(){
-      let connection = new WebSocket('ws://localhost:3000/');
+      let connection = new WebSocket('ws://127.0.0.1:3000/');
       connection.onmessage = (event) => {
         try {
           // only want to stream live data if user is viewing current day
@@ -100,7 +100,7 @@ export default {
     populateTable(selectedOption) {
       this.timeseries = [];
 
-      axios.post("http://localhost:3000/tsdata", {
+      axios.post("http://127.0.0.1:3000/tsdata", {
         method: "POST",
         body: JSON.stringify({
           date: selectedOption.date
@@ -113,7 +113,7 @@ export default {
       });
     },
     getDbData() {
-      axios.get("http://localhost:3000/dates", {
+      axios.get("http://127.0.0.1:3000/dates", {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8"
@@ -126,7 +126,7 @@ export default {
         }
       });
 
-      axios.post("http://localhost:3000/tsdata", {
+      axios.post("http://127.0.0.1:3000/tsdata", {
         method: "POST",
         body: JSON.stringify({
           date: this.selected.date
@@ -138,7 +138,7 @@ export default {
         this.timeseries = res.data.data;
         console.log(this.timeseries);
       });
-    },
+    }
   },
   // functions and variables laoded on page load
   beforeMount() {

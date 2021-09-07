@@ -58,7 +58,7 @@ export default {
       this.apRadioList = [];
       this.apUsbList = [];
 
-      axios.get("http://localhost:3000/approfile?dev=" + this.selectedAp, {
+      axios.get("http://127.0.0.1:3000/approfile?dev=" + this.selectedAp, {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8"
@@ -83,7 +83,7 @@ export default {
         }
         this.numRadios = this.apRadioList.length
 
-        axios.post("http://localhost:3000/avgrssi", {
+        axios.post("http://127.0.0.1:3000/avgrssi", {
           method: "POST",
           body: JSON.stringify({
             devs: this.apDevList,
@@ -105,7 +105,7 @@ export default {
     }
   },
   /*mounted: function() {
-      let connection = new WebSocket('ws://localhost:3000/');
+      let connection = new WebSocket('ws://127.0.0.1:3000/');
       connection.onmessage = (event) => {
         try {
           //console.log(event);

@@ -72,7 +72,7 @@ export default {
       console.log(this.selectedDay, this.selectedDev);
       this.apsfordayble = [];
 
-      axios.post("http://localhost:3000/chartaps", {
+      axios.post("http://127.0.0.1:3000/chartaps", {
         method: "POST",
         body: JSON.stringify({
           dev: this.selectedDev,
@@ -95,7 +95,7 @@ export default {
     },
     showBle(dev) {
       this.selectedDev = dev;
-      axios.post("http://localhost:3000/bledata", {
+      axios.post("http://127.0.0.1:3000/bledata", {
         method: "POST",
         body: JSON.stringify({
             device: this.selectedDev
@@ -114,7 +114,7 @@ export default {
         this.numAps = this.bleApList.length;
       });
 
-      axios.get("http://localhost:3000/chartdates/?dev=" + this.selectedDev, {
+      axios.get("http://127.0.0.1:3000/chartdates/?dev=" + this.selectedDev, {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8"
@@ -134,7 +134,7 @@ export default {
       // generate dygraph
       this.dataCollection = [];
 
-      axios.post("http://localhost:3000/chart", {
+      axios.post("http://127.0.0.1:3000/chart", {
         method: "POST",
         body: JSON.stringify({
           dev: this.selectedDev,

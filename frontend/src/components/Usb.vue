@@ -25,7 +25,7 @@ export default {
     showUsb(dev) {
       this.selectedUsb = dev;
 
-      axios.get("http://localhost:3000/usbprofile?dev=" + this.selectedUsb, {
+      axios.get("http://127.0.0.1:3000/usbprofile?dev=" + this.selectedUsb, {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8"
@@ -40,7 +40,7 @@ export default {
     }
   },
   /*mounted: function() {
-      let connection = new WebSocket('ws://localhost:3000/');
+      let connection = new WebSocket('ws://127.0.0.1:3000/');
       connection.onmessage = (event) => {
         try {
           //console.log(event);
