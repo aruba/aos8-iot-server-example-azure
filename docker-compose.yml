@@ -1,0 +1,13 @@
+version: '3'
+services:
+  app-backend:
+    container_name: app-backend
+    image: webappbackendacr.azurecr.io/aos8-iot-server-example-azure_app-backend:v1
+    ports:
+      - "3000:3000"
+  app-frontend:
+    container_name: app-frontend
+    build: ./frontend
+    image: webappfrontendacr.azurecr.io/app-frontend
+    ports:
+      - "80:80"
