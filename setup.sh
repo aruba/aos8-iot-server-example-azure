@@ -15,9 +15,12 @@ then
     exit
 fi
 
-INIT="true"
+# login to azure cli
+az login
 
-if [ "$INIT" -eq "true" ]; then
+INIT=0
+
+if [ "$INIT" -eq 1 ]; then
         echo "Enter your IotHub Connection String: "  
         read iothubConnectionString
         echo "Enter your Event Hub Consumer Group: "
@@ -32,11 +35,9 @@ if [ "$INIT" -eq "true" ]; then
         read db
         echo "Enter your Database resource group: "
         read dbRg
-        echo "IotHubConnectionString=$iothubConnectionString\nEventHubConsumerGroup=$eventHubConsumerGroup\nDBHOST=$dbServer\nDBUSER=$dbUsername\nDBPASSWORD=$dbPassword\nDATABASE=$db" > .env
+        echo -e "IotHubConnectionString='$iothubConnectionString'\nEventHubConsumerGroup='$eventHubConsumerGroup'\nDBHOST='$dbServer'\nDBUSER='$dbUsername'\nDBPASSWORD='$dbPassword'\nDATABASE='$db'" > .env
 
-        # login to azure cli
-        az login
-
+        
         # Set up your Azure database for postgreSQL
         # OPTIONAL: if you have multiple azure subscriptions, run this command to set the one you wish to use: az account set --subscription <subscription id>
         az extension add --name db-up
@@ -51,12 +52,12 @@ cat .env
 
 # WEB APP
 # build backend image
+docker context use default
 docker build --file=backend/Dockerfile -t aos8-iot-server-example-azure_app-backend .
 #az group create --name myResourceGroup --location eastus
 #az acr create --resource-group myResourceGroup --name <acrName> --sku Basic
 az acr login --name webappbackendacr
 docker tag aos8-iot-server-example-azure_app-backend webappbackendacr.azurecr.io/aos8-iot-server-example-azure_app-backend:v1
-docker context use default
 docker push webappbackendacr.azurecr.io/aos8-iot-server-example-azure_app-backend:v1
 
 az acr login --name webappfrontendacr

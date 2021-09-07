@@ -3,6 +3,13 @@ services:
   app-backend:
     container_name: app-backend
     image: webappbackendacr.azurecr.io/aos8-iot-server-example-azure_app-backend:v1
+    environment:
+      IotHubConnectionString: "${IotHubConnectionString}"
+      EventHubConsumerGroup: "${EventHubConsumerGroup}"
+      DBHOST: "${DBHOST}"
+      DBUSER: "${DBUSER}"
+      DBPASSWORD: "${DBPASSWORD}"
+      DATABASE: "${DATABASE}"
     ports:
       - "3000:3000"
   app-frontend:
