@@ -13,7 +13,7 @@ today = mm + '/' + dd + '/' + yyyy;
 class postgresDbHandler {
    /**
     * InitHandles the various APIs for displaying and managing tasks
-    * @param {pgClient} pgClient
+    * @param {PG.Pool} pgClient
     */
    constructor(pgClient) {
      this.pgClient = pgClient;
@@ -99,7 +99,6 @@ class postgresDbHandler {
    }
 
    async getTableData(req, res) {
-     //console.log("req:", req);
      const payload = JSON.parse(req.body.body);
      const date = payload.date;
      const query = `SELECT * FROM tsdatahypertable WHERE tsdatahypertable.date = '` + date + `' ORDER BY time DESC;`;
@@ -111,6 +110,7 @@ class postgresDbHandler {
        }
 
        res.send({data: queryres.rows});
+       console.log("function over");
      });
    }
 

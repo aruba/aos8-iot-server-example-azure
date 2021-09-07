@@ -31,7 +31,7 @@ export default {
     showRadio(dev) {
       this.selectedRadio = dev;
 
-      axios.get("http://localhost:3000/radioprofile?dev=" + this.selectedRadio, {
+      axios.get("http://127.0.0.1:3000/radioprofile?dev=" + this.selectedRadio, {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8"
@@ -49,7 +49,7 @@ export default {
     }
   },
   /*mounted: function() {
-      let connection = new WebSocket('ws://localhost:3000/');
+      let connection = new WebSocket('ws://127.0.0.1:3000/');
       connection.onmessage = (event) => {
         try {
           //console.log(event);

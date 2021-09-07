@@ -155,7 +155,7 @@ export default {
       this.profile = type;
     },
     getDbData() {
-      axios.get("http://localhost:3000/tabledata/radiotable", {
+      axios.get("http://127.0.0.1:3000/tabledata/radiotable", {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8"
@@ -169,7 +169,7 @@ export default {
         }
       });
 
-      axios.get("http://localhost:3000/tabledata/usbtable", {
+      axios.get("http://127.0.0.1:3000/tabledata/usbtable", {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8"
@@ -183,7 +183,7 @@ export default {
         }
       });
 
-      axios.get("http://localhost:3000/tabledata/aptable", {
+      axios.get("http://127.0.0.1:3000/tabledata/aptable", {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8"
@@ -197,7 +197,7 @@ export default {
         }
       });
 
-      axios.get("http://localhost:3000/tabledata/bledevtable", {
+      axios.get("http://127.0.0.1:3000/tabledata/bledevtable", {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8"

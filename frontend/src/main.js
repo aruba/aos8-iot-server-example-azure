@@ -19,7 +19,6 @@ Vue.use(Vuex)
 Vue.use(VueCookies)
 Vue.component('menu-icon', MenuIcon);
 
-
 /*const store = new Vuex.Store({
   state: {
 
