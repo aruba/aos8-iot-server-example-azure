@@ -18,7 +18,8 @@ fi
 # login to azure cli
 az login
 
-INIT=0
+# set to 0 to turn off init step
+INIT=1
 
 if [ "$INIT" -eq 1 ]; then
         echo "Enter your IotHub Connection String: "  
