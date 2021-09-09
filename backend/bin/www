@@ -261,8 +261,8 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
             VALUES ('` + deviceId + `', 'unknown', '{` + message.usbDevice[0].identifier + `}', '{}', '{}')
             ON CONFLICT (device_id)
             DO
-            UPDATE SET radio_devices = (SELECT ARRAY_AGG(DISTINCT e) FROM UNNEST(aptable.radio_devices || '{` + message.usbDevice[0].identifier +`}') e) 
-            WHERE NOT aptable.radio_devices @> '{` + message.usbDevice[0].identifier +`}' AND aptable.device_id = '` + deviceId + `';`;
+            UPDATE SET usb_devices = (SELECT ARRAY_AGG(DISTINCT e) FROM UNNEST(aptable.usb_devices || '{` + message.usbDevice[0].identifier +`}') e) 
+            WHERE NOT aptable.usb_devices @> '{` + message.usbDevice[0].identifier +`}' AND aptable.device_id = '` + deviceId + `';`;
 
             pgPool.query(queryApUsb, (err, res) => {
               if (err) {

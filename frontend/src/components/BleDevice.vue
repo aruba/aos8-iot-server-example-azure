@@ -1,5 +1,5 @@
 <template>
-  <div style="background: whitesmoke; width: 100%;">
+  <div style="background: whitesmoke; width: 100%;" v-if="show">
       <div style="display: flex;">
           <div style="margin-left:10px; margin-right: 60px; margin-top: 75px">
             <h1 class="has-text-weight-bold subtitle">Device {{selectedDev}}</h1>
@@ -11,8 +11,25 @@
 
           <div>
             <div style="float: right; margin-top: 10px; margin-bottom: 25px;">
-              <b-button disabled>Control this Device</b-button>
+              <b-button @click="isComponentModalActive = true">Control this Device</b-button>
+
+              <b-modal :active.sync="isComponentModalActive" has-modal-card>
+                <form action="">
+                  <div class="modal-card" style="width: 700px; height: 700px;">
+                      <header class="modal-card-head">
+                          <p class="modal-card-title">SouthBound API for {{selectedDev}}</p>
+                      </header>
+                      <section class="modal-card-body">
+                        <file-select v-model="file"></file-select>
+                      </section>
+                      <footer class="modal-card-foot">
+                          <button class="button is-primary">Send</button>
+                      </footer>
+                  </div>
+                </form>
+              </b-modal>
             </div>
+
             <div style="clear: right; margin-bottom: 10px;">
               <h1 class="has-text-weight-bold subtitle">RSSI Over Time Visualization</h1>
             </div>
@@ -52,9 +69,13 @@ import axios from "axios";
 import Dygraph from 'dygraphs';
 import domtoimage from 'dom-to-image';
 import { saveAs } from 'file-saver';
+import FileSelect from './FileSelect.vue';
 
 export default {
   name: 'BleDevice',
+  components: {
+    FileSelect
+  },
   data() {
     return {
       bleApList: [],
@@ -65,6 +86,9 @@ export default {
       selectedAp: '',
       apsfordayble: [],
       dataCollection: [],
+      isComponentModalActive: false,
+      file: null,
+      show: false,
     };
   },
   methods: {
@@ -181,6 +205,7 @@ export default {
       // your code goes here
       console.log("item and response in bledev profile:", item);
       this.showBle(item);
+      this.show = true;
     });
   },
 };

@@ -22,23 +22,26 @@ az login
 INIT=1
 
 if [ "$INIT" -eq 1 ]; then
-        echo "Enter your IotHub Connection String: "  
+        # query user for required environment variables
+        echo "Enter your IotHub Connection String: "
         read iothubConnectionString
         echo "Enter your Event Hub Consumer Group: "
         read eventHubConsumerGroup
-        echo "Enter your Database Host: "  
+        echo "Enter your Database Host: "
         read dbServer
         echo "Enter your Database User: "
         read dbUsername
-        echo "Enter your Database Password: "  
+        echo "Enter your Database Password: "
         read dbPassword
         echo "Enter your Database: "
         read db
-        echo "Enter your Database resource group: "
+        echo "Enter your desired Database resource group: "
         read dbRg
         echo -e "IotHubConnectionString='$iothubConnectionString'\nEventHubConsumerGroup='$eventHubConsumerGroup'\nDBHOST='$dbServer'\nDBUSER='$dbUsername'\nDBPASSWORD='$dbPassword'\nDATABASE='$db'" > .env
 
-        
+        # create resource group
+        az group create --name $dbRg --location westus
+
         # Set up your Azure database for postgreSQL
         # OPTIONAL: if you have multiple azure subscriptions, run this command to set the one you wish to use: az account set --subscription <subscription id>
         az extension add --name db-up
@@ -48,6 +51,11 @@ if [ "$INIT" -eq 1 ]; then
         az postgres server configuration set --resource-group $dbRg ––server-name $dbServer --name shared_preload_libraries --value timescaledb
         az postgres server restart --resource-group $dbRg --name $dbServer
 fi
+
+# TODO: ensure that env file 1) exists and 2) is not empty
+#if ! [ -f ".env" ]; then
+#    echo "$FILE exists."
+#fi
 
 cat .env
 

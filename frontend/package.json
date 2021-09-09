@@ -35,7 +35,8 @@
     "@mdi/font": "^5.9.55",
     "@mdi/js": "^5.9.55",
     "dom-to-image": "^2.6.0",
-    "file-saver": "^2.0.5"
+    "file-saver": "^2.0.5",
+    "azure-iothub": "^1.14.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

@@ -1,5 +1,5 @@
 <template>
-  <div style="background: whitesmoke; width: 100%;">
+  <div style="background: whitesmoke; width: 100%;" v-if="show">
       <div style="display: flex;">
           <div style="margin-left:10px; margin-right: 80px; margin-top: 75px">
             <h1 class="has-text-weight-bold subtitle">Usb {{selectedUsb}}</h1>
@@ -19,6 +19,7 @@ export default {
     return {
       selectedUsb: '',
       health: '',
+      show: false,
     };
   },
   methods: {
@@ -64,6 +65,7 @@ export default {
       // your code goes here
       console.log("item and response in usb profile:", item);
       this.showUsb(item);
+      this.show = true;
     });
   },
 };
