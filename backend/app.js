@@ -42,7 +42,7 @@ if (dbsetup) {
         console.log('timescale extension created');
     });
 
-    const queryTsdatahypertable = `CREATE TABLE IF NOT EXISTS tsdatahypertable (time TIMESTAMPTZ NOT NULL, device TEXT NOT NULL, rssi SMALLINT NOT NULL, ble_data TEXT NOT NULL, frame_type TEXT NOT NULL, mac_addr_type TEXT NOT NULL, ap TEXT NOT NULL);`;
+    const queryTsdatahypertable = `CREATE TABLE IF NOT EXISTS tsdatahypertable (time TIMESTAMPTZ NOT NULL, device TEXT NOT NULL, rssi SMALLINT NOT NULL, ble_data TEXT NOT NULL, frame_type TEXT NOT NULL, mac_addr_type TEXT NOT NULL, ap TEXT NOT NULL, date TEXT);`;
     pgPool.query(queryTsdatahypertable, (err, res) => {
         if (err) {
             console.error(err);
@@ -103,6 +103,20 @@ if (dbsetup) {
     });
 }
 
+function printResultFor(op) {
+      return function printResult(err, res) {
+        if (err) console.log(op + ' error: ' + err.toString());
+        if (res) console.log(op + ' status: ' + res.constructor.name);
+      };
+}
+
+function receiveFeedback(err, receiver){
+      receiver.on('message', function (msg) {
+        console.log('Feedback message:')
+        console.log(msg.getData().toString('utf-8'));
+      });
+}
+
 app.use(cors())
 app.use(logger('dev'))
 app.use(bodyParser.json())
@@ -110,9 +124,40 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.get('/', function (req, res, next) {
-    res.render('Welcome to backend', {title: 'Express'});
+// respond with "hello world" when a GET request is made to the homepage
+app.get('/', function (req, res) {
+    res.send('hello world');
 });
+
+// respond with "hello world" when a GET request is made to the homepage
+app.post('/southbound', function (req, res) {
+    'use strict';
+
+    const payload = JSON.parse(req.body.body);
+
+    var Client = require('azure-iothub').Client;
+    var Message = require('azure-iot-common').Message;
+    var connectionString = config.iothubconnectionstring;
+    var targetDevice = payload.dev;
+
+    var serviceClient = Client.fromConnectionString(connectionString);
+
+    serviceClient.open(function (err) {
+      if (err) {
+        console.error('Could not connect: ' + err.message);
+      } else {
+        console.log('Service client connected');
+        serviceClient.getFeedbackReceiver(receiveFeedback);
+        var message = new Message(JSON.stringify(payload.jsonCommands));
+        message.ack = 'full';
+        message.messageId = "My Message ID";
+        console.log('Sending message: ' + message.getData());
+        serviceClient.send(targetDevice, message, printResultFor('send'));
+
+        res.send({data: "complete"});
+      }
+    });
+})
 
 app.get('/tabledata/:type', (req, res, next) => pgHandler.getAllData(req, res).catch(next))
 app.post('/bledata', (req, res, next) => pgHandler.getBleDataAp(req, res).catch(next))
@@ -125,6 +170,7 @@ app.get('/usbprofile', (req, res, next) => pgHandler.getUsbProfile(req, res).cat
 app.post('/chart', (req, res, next) => pgHandler.getChartData(req, res).catch(next))
 app.post('/tsdata', (req, res, next) => pgHandler.getTableData(req, res).catch(next))
 app.post('/avgrssi', (req, res, next) => pgHandler.getAvgRssi(req, res).catch(next))
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

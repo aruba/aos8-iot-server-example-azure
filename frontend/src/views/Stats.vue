@@ -30,35 +30,27 @@
 
                   <br>
 
-                  <b-menu-item icon="view-dashboard" label="Access Points">
-                    <b-menu-item icon="apps" v-for="ap in accesspoints" :key="ap.device_id">
-                      <template #label>
-                        <span v-on:click="handleEvent($event, 'ap')">{{ap.device_id}}</span>
-                      </template>
+                  <b-menu-item icon="view-dashboard" label="Access Points" v-on:click="profile='aptopology'">
+                    <b-menu-item icon="apps" v-for="ap in accesspoints" :key="ap.device_id" v-on:click="handleEvent($event, 'ap')">
+                      <template #label>{{ap.device_id}}</template>
                     </b-menu-item>
                   </b-menu-item>
 
-                  <b-menu-item icon="view-dashboard" label="Radio Devices">
-                    <b-menu-item icon="apps" v-for="radio in radios" :key="radio.mac_addr">
-                      <template #label>
-                        <span v-on:click="handleEvent($event, 'radio')">{{radio.mac_addr}}</span>
-                      </template>
+                  <b-menu-item icon="view-dashboard" label="Radio Devices" v-on:click="profile='radiotopology'">
+                    <b-menu-item icon="apps" v-for="radio in radios" :key="radio.mac_addr" v-on:click="handleEvent($event, 'radio')">
+                      <template #label>{{radio.mac_addr}}</template>
                     </b-menu-item>
                   </b-menu-item>
 
-                  <b-menu-item icon="view-dashboard" label="BLE Devices">
-                    <b-menu-item icon="apps" v-for="bledev in bledevs" :key="bledev.device_identifier">
-                      <template #label>
-                        <span v-on:click="handleEvent($event, 'ble')">{{bledev.device_identifier}}</span>
-                      </template>
+                  <b-menu-item icon="view-dashboard" label="BLE Devices" v-on:click="profile='bletopology'">
+                    <b-menu-item icon="apps" v-for="bledev in bledevs" :key="bledev.device_identifier" v-on:click="handleEvent($event, 'ble')">
+                      <template #label>{{bledev.device_identifier}}</template>
                     </b-menu-item>
                   </b-menu-item>
 
-                  <b-menu-item icon="view-dashboard" label="USB Devices">
-                    <b-menu-item icon="apps" v-for="usb in usbs" :key="usb.id">
-                      <template #label>
-                        <span v-on:click="handleEvent($event, 'usb')">{{usb.id}}</span>
-                      </template>
+                  <b-menu-item icon="view-dashboard" label="USB Devices" v-on:click="profile='usbtopology'">
+                    <b-menu-item icon="apps" v-for="usb in usbs" :key="usb.id" v-on:click="handleEvent($event, 'usb')">
+                      <template #label>{{usb.id}}</template>
                     </b-menu-item>
                   </b-menu-item>
                 </b-menu-list>
@@ -69,6 +61,10 @@
         </b-sidebar>
       </div>
 
+      <ApTopology v-if="profile=='aptopology'"></ApTopology>
+      <RadioTopology v-if="profile=='radiotopology'"></RadioTopology>
+      <BleTopology v-if="profile=='bletopology'"></BleTopology>
+      <UsbTopology v-if="profile=='usbtopology'"></UsbTopology>
       <BleDevice v-if="profile=='ble'"></BleDevice>
       <AccessPoint v-if="profile=='ap'"></AccessPoint>
       <Radio v-if="profile=='radio'"></Radio>
@@ -84,6 +80,10 @@ import BleDevice from "../components/BleDevice.vue";
 import AccessPoint from "../components/AccessPoint.vue";
 import Radio from "../components/Radio.vue";
 import Usb from "../components/Usb.vue";
+import BleTopology from "../components/BleTopology.vue";
+import ApTopology from "../components/ApTopology.vue";
+import UsbTopology from "../components/UsbTopology.vue";
+import RadioTopology from "../components/RadioTopology.vue";
 
 export default {
   name: 'Stats',
@@ -91,7 +91,11 @@ export default {
     BleDevice,
     AccessPoint,
     Radio,
-    Usb
+    Usb,
+    BleTopology,
+    ApTopology,
+    UsbTopology,
+    RadioTopology
   },
   data() {
     return {

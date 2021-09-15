@@ -2,6 +2,7 @@
 node_modules
 /dist
 /scripts
+/testJson
 package-lock.json
 
 # local env files

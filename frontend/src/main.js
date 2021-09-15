@@ -9,14 +9,13 @@ import 'buefy/dist/buefy.css'
 import MenuIcon from 'vue-material-design-icons/Menu.vue';
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import '@mdi/font/css/materialdesignicons.css'
-import Chartkick from 'vue-chartkick'
-import Chart from 'chart.js'
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 
-Vue.use(Chartkick.use(Chart))
-
+Vue.component('loading-overlay', Loading);
 Vue.use(Buefy);
-Vue.use(Vuex)
-Vue.use(VueCookies)
+Vue.use(Vuex);
+Vue.use(VueCookies);
 Vue.component('menu-icon', MenuIcon);
 
 /*const store = new Vuex.Store({
@@ -25,7 +24,7 @@ Vue.component('menu-icon', MenuIcon);
   }
 })*/
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 new Vue({
   vuetify,

@@ -1,5 +1,5 @@
 <template>
-  <div style="background: whitesmoke; width: 100%;">
+  <div style="background: whitesmoke; width: 100%;" v-if="show">
       <div style="display: flex;">
           <div style="margin-left:10px; margin-right: 80px; margin-top: 75px">
             <h1 class="has-text-weight-bold subtitle">Access Point {{selectedAp}}</h1>
@@ -49,6 +49,7 @@ export default {
       numUsbs: 0,
       selectedAp: '',
       health: '',
+      show: false
     };
   },
   methods: {
@@ -129,6 +130,7 @@ export default {
       // your code goes here
       console.log("item and response in ap profile:", item);
       this.showAp(item);
+      this.show = true;
     });
   },
 };

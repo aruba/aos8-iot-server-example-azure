@@ -1,5 +1,5 @@
 <template>
-  <div style="background: whitesmoke; width: 100%;">
+  <div style="background: whitesmoke; width: 100%;" v-if="show">
       <div style="display: flex;">
           <div style="margin-left:10px; margin-right: 80px; margin-top: 75px">
             <h1 class="has-text-weight-bold subtitle">Radio {{selectedRadio}}</h1>
@@ -24,7 +24,8 @@ export default {
       type: '',
       firmware: '',
       health: '',
-      external: ''
+      external: '',
+      show: false,
     };
   },
   methods: {
@@ -73,6 +74,7 @@ export default {
       // your code goes here
       console.log("item and response in radio profile:", item);
       this.showRadio(item);
+      this.show = true;
     });
   },
 };
