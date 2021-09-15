@@ -1,41 +1,47 @@
-<template>
-  <div id="main" style="display: flex; justify-content: center; align-items: center; margin-top: 100px">
-    <div class="card has-background-dark has-text-white-bis" style="margin-right: 45px">
-      <header class="card-header">
-        <div class="center2">
-          <p class="card-header-title has-text-white-bis">Live Structured Data</p>
-        </div>
-      </header>
-
-      <div class="card-content">
-        <div class="content">
-          View real-time data from IoT-Hub structured into a easy to digest and filterable table.
-        </div>
-      </div>
-
-      <footer class="card-footer">
-        <router-link :to="{ path: 'table' }">
-          <div class="center"><button class="button orange">Live Data</button></div>
-        </router-link>
-      </footer>
+<template id="main">
+  <div>
+    <div>
+        <h1 style="font-size: xx-large; color: azure">Aos8 Azure IoT-Hub Server Example</h1>
     </div>
 
-    <div class="card has-background-dark has-text-white-bis">
-      <header class="card-header">
-        <div class="center2">
-          <p class="card-header-title has-text-white-bis">Device Profile List</p>
+    <div style="display: flex; justify-content: center; align-items: center; margin-top: 100px">
+      <div class="card has-background-dark has-text-white-bis" style="clear: both; margin-right: 45px">
+        <header class="card-header">
+          <div class="center2">
+            <p class="card-header-title has-text-white-bis">Live Structured Data</p>
+          </div>
+        </header>
+
+        <div class="card-content">
+          <div class="content">
+            View real-time data from IoT-Hub structured into a easy to digest and filterable table.
+          </div>
         </div>
-      </header>
-      <div class="card-content">
-        <div class="content">
-          View IoT Device Profiles, Visualize Statistics, and Interact With Devices Connected to IoT Hub
-        </div>
+
+        <footer class="card-footer">
+          <router-link :to="{ path: 'table' }">
+            <div class="center"><button class="button orange">Live Data</button></div>
+          </router-link>
+        </footer>
       </div>
-      <footer class="card-footer">
-        <router-link :to="{ path: 'stats' }">
-          <div class="center"><button class="button orange">Device List</button></div>
-        </router-link>
-      </footer>
+
+      <div class="card has-background-dark has-text-white-bis">
+        <header class="card-header">
+          <div class="center2">
+            <p class="card-header-title has-text-white-bis">Device Profile List</p>
+          </div>
+        </header>
+        <div class="card-content">
+          <div class="content">
+            View IoT Device Profiles, Visualize Statistics, and Interact With Devices Connected to IoT Hub
+          </div>
+        </div>
+        <footer class="card-footer">
+          <router-link :to="{ path: 'stats' }">
+            <div class="center"><button class="button orange">Device List</button></div>
+          </router-link>
+        </footer>
+      </div>
     </div>
   </div>
 </template>

@@ -42,7 +42,7 @@ if (dbsetup) {
         console.log('timescale extension created');
     });
 
-    const queryTsdatahypertable = `CREATE TABLE IF NOT EXISTS tsdatahypertable (time TIMESTAMPTZ NOT NULL, device TEXT NOT NULL, rssi SMALLINT NOT NULL, ble_data TEXT NOT NULL, frame_type TEXT NOT NULL, mac_addr_type TEXT NOT NULL, ap TEXT NOT NULL);`;
+    const queryTsdatahypertable = `CREATE TABLE IF NOT EXISTS tsdatahypertable (time TIMESTAMPTZ NOT NULL, device TEXT NOT NULL, rssi SMALLINT NOT NULL, ble_data TEXT NOT NULL, frame_type TEXT NOT NULL, mac_addr_type TEXT NOT NULL, ap TEXT NOT NULL, date TEXT);`;
     pgPool.query(queryTsdatahypertable, (err, res) => {
         if (err) {
             console.error(err);
