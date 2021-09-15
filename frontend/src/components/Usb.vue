@@ -2,7 +2,7 @@
   <div style="background: whitesmoke; width: 100%;" v-if="show">
       <div style="display: flex;">
           <div style="margin-left:10px; margin-right: 80px; margin-top: 75px">
-            <h1 class="has-text-weight-bold subtitle">Usb {{selectedUsb}}</h1>
+            <h1 class="has-text-weight-bold subtitle">{{selectedUsb}}</h1>
             <p>Current Health Status: {{health}}</p>
           </div>
       </div>

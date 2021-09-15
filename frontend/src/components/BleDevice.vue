@@ -1,5 +1,6 @@
 <template>
   <div style="background: whitesmoke; width: 100%;" v-if="show">
+    <loading-overlay :active="isLoading" :is-full-page="fullPage" :loader="loader" />
       <div style="display: flex;">
           <div style="margin-left:10px; margin-right: 60px; margin-top: 75px">
             <h1 class="has-text-weight-bold subtitle">Device {{selectedDev}}</h1>
@@ -14,7 +15,8 @@
               <b-button @click="isComponentModalActive = true">Control this Device</b-button>
 
               <b-modal :active.sync="isComponentModalActive" has-modal-card>
-                <form action="">
+                <form v-on:submit.prevent="onSubmit">
+
                   <div class="modal-card" style="width: 700px; height: 700px;">
                       <header class="modal-card-head">
                           <p class="modal-card-title">SouthBound API for {{selectedDev}}</p>
@@ -23,7 +25,8 @@
                         <file-select v-model="file"></file-select>
                       </section>
                       <footer class="modal-card-foot">
-                          <button class="button is-primary">Send</button>
+                        <button class="button is-primary">Send</button>
+                        <p style="color: green; margin-top: 20px; margin-left: 10px;">{{ southBoundResult }}</p>
                       </footer>
                   </div>
                 </form>
@@ -89,6 +92,10 @@ export default {
       isComponentModalActive: false,
       file: null,
       show: false,
+      isLoading: false,
+      fullPage: false,
+      loader: 'bars',
+      southBoundResult: ''
     };
   },
   methods: {
@@ -154,6 +161,27 @@ export default {
         this.handleDayChange();
       });
     },
+    onSubmit: function(e) {
+      // json, device id
+      //console.log(e.target[1].value, this.selectedDev);
+
+      this.isLoading = true;
+
+      axios.post("http://127.0.0.1:3000/southbound", {
+        method: "POST",
+        body: JSON.stringify({
+          dev: this.selectedDev,
+          jsonCommands: e.target[1].value
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        }
+      }).then((res) => {
+        //console.log("response from southbound", res.data.data);
+        this.southBoundResult = res.data.data;
+        this.isLoading = false
+      });
+    },
     showChart() {
       // generate dygraph
       this.dataCollection = [];
@@ -184,6 +212,7 @@ export default {
         }
 
         this.setChart(datastr);
+        this.isLoading = false;
       });
     },
     downloadChart() {
@@ -203,6 +232,7 @@ export default {
   mounted() {
     this.$root.$on('bleProfile', (item) => {
       // your code goes here
+      this.isLoading = true;
       console.log("item and response in bledev profile:", item);
       this.showBle(item);
       this.show = true;

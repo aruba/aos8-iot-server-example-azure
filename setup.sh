@@ -38,6 +38,7 @@ if [ "$INIT" -eq 1 ]; then
         echo "Enter your desired Database resource group: "
         read dbRg
         echo -e "IotHubConnectionString='$iothubConnectionString'\nEventHubConsumerGroup='$eventHubConsumerGroup'\nDBHOST='$dbServer'\nDBUSER='$dbUsername'\nDBPASSWORD='$dbPassword'\nDATABASE='$db'" > .env
+        echo -e "VUE_APP_IotHubConnectionString='$iothubConnectionString'" > .env
 
         # create resource group
         az group create --name $dbRg --location westus

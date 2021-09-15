@@ -28,6 +28,8 @@
     "minimist": ">=1.2.5",
     "rhea-promise": "^1.0.0",
     "cors": "^2.8.5",
-    "ws": "^8.0.0"
+    "ws": "^8.0.0",
+    "azure-iot-common": "^1.12.11",
+    "azure-iothub": "^1.14.4"
   }
 }

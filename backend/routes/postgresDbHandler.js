@@ -110,7 +110,6 @@ class postgresDbHandler {
        }
 
        res.send({data: queryres.rows});
-       console.log("function over");
      });
    }
 

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <loading-overlay :active="isLoading" :is-full-page="fullPage" :loader="loader" />
     <section class="section is-vcentered">
       <h1 style="font-size: xx-large; color: azure">Select from Available Dates</h1>
       <multiselect v-model="selected" :options="data" placeholder="Select a date" label="date" track-by="date" @select="populateTable"></multiselect>
@@ -71,6 +72,9 @@ export default {
       todaydate: today,
       live: true,
       search: '',
+      isLoading: false,
+      fullPage: false,
+      loader: 'dots',
       headers: [
         { text: 'Timestamp', value: 'time' },
         { text: 'Device', value: 'device' },
@@ -98,6 +102,7 @@ export default {
   },
   methods: {
     populateTable(selectedOption) {
+      this.isLoading = true;
       this.timeseries = [];
 
       axios.post("http://127.0.0.1:3000/tsdata", {
@@ -110,9 +115,12 @@ export default {
         }
       }).then((res) => {
         this.timeseries = res.data.data;
+        this.isLoading = false;
       });
     },
     getDbData() {
+      this.isLoading = true;
+
       axios.get("http://127.0.0.1:3000/dates", {
         method: "GET",
         headers: {
@@ -136,7 +144,8 @@ export default {
         }
       }).then((res) => {
         this.timeseries = res.data.data;
-        console.log(this.timeseries);
+        //console.log(this.timeseries);
+        this.isLoading = false;
       });
     }
   },

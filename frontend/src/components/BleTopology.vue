@@ -4,7 +4,7 @@
       <h1 class="has-text-weight-bold subtitle">All BLE Devices</h1>
     </div>
     <div style="margin-left: 50px;">
-      <table class="table is-bordered is-striped is-hoverable is-fullwidth" style="display: block; height: 500px; overflow: auto;">
+      <table class="table is-bordered is-striped is-hoverable is-fullwidth" style="display: block; height: 600px; overflow: auto;">
         <thead>
           <tr>
             <th>Device ID</th>
@@ -14,7 +14,7 @@
         <tbody>
           <tr v-for="bledev in bledevs" :key="bledev.device_identifier">
             <th>{{ bledev.device_identifier }}</th>
-            <th>{{ bledev.access_points }}</th>
+            <th>{{ formatedAccessPoints(bledev.access_points) }}</th>
           </tr>
         </tbody>
       </table>
@@ -33,6 +33,17 @@ export default {
     };
   },
   methods: {
+    formatedAccessPoints(aps) {
+      let formatted = '';
+      for (let i = 0; i < aps.length; i++) {
+        formatted += aps[0];
+
+        if (i !== (aps.length - 1)) {
+          formatted += ', ';
+        }
+      }
+      return formatted;
+    },
     handleEvent(dev) {
       console.log(dev);
       //this.$root.$emit('bleProfile', dev);
