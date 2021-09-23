@@ -93,7 +93,11 @@ export default {
           // only want to stream live data if user is viewing current day
           if (this.selected.date === this.todaydate && this.live) {
             const payload = JSON.parse(event.data);
-            this.timeseries.unshift(payload);
+            // only add ble_data to table
+            if (payload.hasOwnProperty('ble_data')) {
+              console.log("in property test");
+              this.timeseries.unshift(payload);
+            }
           }
         } catch (err) {
           console.error(err);

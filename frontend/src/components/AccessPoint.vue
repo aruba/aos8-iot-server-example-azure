@@ -1,5 +1,6 @@
 <template>
   <div style="background: whitesmoke; width: 100%;" v-if="show">
+     <loading-overlay :active="isLoading" :is-full-page="fullPage" :loader="loader" />
       <div style="display: flex;">
           <div style="margin-left:10px; margin-right: 80px; margin-top: 75px">
             <h1 class="has-text-weight-bold subtitle">Access Point {{selectedAp}}</h1>
@@ -49,11 +50,15 @@ export default {
       numUsbs: 0,
       selectedAp: '',
       health: '',
+      isLoading: false,
+      fullPage: false,
+      loader: 'dots',
       show: false
     };
   },
   methods: {
     showAp(dev) {
+      this.isLoading = true;
       this.selectedAp = dev;
       this.apDevList = [];
       this.apRadioList = [];
@@ -100,6 +105,8 @@ export default {
           for (let i = 0; i < res.data.data.length; i++) {
             this.apDevList.push(res.data.data[i]);
           }
+
+          this.isLoading = false;
         });
       });
 
@@ -128,7 +135,7 @@ export default {
   mounted() {
     this.$root.$on('apProfile', (item) => {
       // your code goes here
-      console.log("item and response in ap profile:", item);
+      //console.log("item and response in ap profile:", item);
       this.showAp(item);
       this.show = true;
     });

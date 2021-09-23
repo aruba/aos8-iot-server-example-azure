@@ -1,5 +1,12 @@
 #!/bin/bash
 
+### !!IMPORTANT - Script currently does not work (is incomplete), follow steps on confluence page instead!! ###
+# TODO needs to be to fixed before working:
+#   - Figure out how to replace values in docker-compose yaml file
+#   - make sure docker version is up to date
+#   - change docker login azure with --tenant-id flag set 
+#   - 
+
 # Dependencies
 # - Azure CLI
 # - Docker
@@ -38,7 +45,6 @@ if [ "$INIT" -eq 1 ]; then
         echo "Enter your desired Database resource group: "
         read dbRg
         echo -e "IotHubConnectionString='$iothubConnectionString'\nEventHubConsumerGroup='$eventHubConsumerGroup'\nDBHOST='$dbServer'\nDBUSER='$dbUsername'\nDBPASSWORD='$dbPassword'\nDATABASE='$db'" > .env
-        echo -e "VUE_APP_IotHubConnectionString='$iothubConnectionString'" > .env
 
         # create resource group
         az group create --name $dbRg --location westus

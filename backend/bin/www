@@ -79,7 +79,7 @@ pgPool.connect((err, pgListener, release) => {
   if (err) {
     return console.error('Error acquiring client', err.stack)
   }
-  const query = pgListener.query('LISTEN new_azurepgmsg');
+  pgListener.query('LISTEN new_azurepgmsg');
 
   pgListener.on('notification', async (data) => {
     //const payload = JSON.parse(data.payload);
@@ -150,14 +150,17 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
 (async () => {
   await eventHubReader.startReadMessage((props, message, date, deviceId) => {
     try {
-      console.log("props: ", props);
-      console.log("message: ", message);
-      console.log("date: ", date);
-      console.log("deviceID: ", deviceId);
+        console.log("props: ", props);
+        console.log("message: ", message);
+        console.log("date: ", date);
+        console.log("deviceID: ", deviceId);
 
-      tmpdate = JSON.parse(JSON.stringify({"testdate": date})).testdate
+        tmpdate = JSON.parse(JSON.stringify({"testdate": date})).testdate;
 
-      if (props.messageType === "bleData") {
+        if (props.messageType === "actionResults" || props.messageType === "status") {
+            // broadcast for the ble dev file to view result
+            wss.broadcast(JSON.stringify(message));
+        } else if (props.messageType === "bleData") {
           // handle bledata message
           queryTs = `
           INSERT INTO tsdatahypertable (date, time, device, rssi, ble_data, frame_type, mac_addr_type, ap)
@@ -202,7 +205,7 @@ const eventHubReader = new EventHubReader(iotHubConnectionString, eventHubConsum
              }
              console.log('Data insert successful');
           });
-      } else {
+      } else if (props.messageType === "apHealthUpdate") {
           // handle health check
 
           queryHealth = `
