@@ -81,12 +81,12 @@
 
                                 <div v-if="selectedProperty==='writeWithResponse'">
                                   <span>data: </span>
-                                  <input v-model="SBdata" placeholder="">
+                                  <textarea style="outline: none !important; border-color: black; box-shadow: 0 0 10px black; height: 30px;" v-model="SBdata" placeholder="data"></textarea>
                                 </div>
 
                                 <div v-else-if="selectedProperty==='writeWithoutResponse'">
                                   <span>data: </span>
-                                  <input v-model="SBdata" placeholder="data">
+                                  <textarea style="outline: none !important; border-color: black; box-shadow: 0 0 10px black; height: 30px;" v-model="SBdata" placeholder="data"></textarea>
                                 </div>
 
                                 <div v-else-if="selectedProperty==='notify'">
@@ -152,12 +152,12 @@
                               <div style="display: flex;">
                                 <div style="margin-right: 20px;">
                                   <p>Requests</p>
-                                  <textarea style="outline: none !important; border-color: black; box-shadow: 0 0 10px black; width: 350px; height: 400px;" v-model="jsonreqs" placeholder="JSON Requests Sent"></textarea>
+                                  <textarea style="outline: none !important; border-color: black; box-shadow: 0 0 10px black; width: 350px; height: 500px;" v-model="jsonreqs" placeholder="JSON Requests Sent"></textarea>
                                 </div>
 
                                 <div>
                                   <p>Responses</p>
-                                  <textarea style="outline: none !important; border-color: black; box-shadow: 0 0 10px black; width: 350px; height: 400px;" v-model="jsonresps" placeholder="JSON Responses Recieved"></textarea>
+                                  <textarea style="outline: none !important; border-color: black; box-shadow: 0 0 10px black; width: 350px; height: 500px;" v-model="jsonresps" placeholder="JSON Responses Recieved"></textarea>
                                 </div>
                               </div>
                             </div>
@@ -172,6 +172,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 import axios from "axios";
 import Dygraph from 'dygraphs';
 import domtoimage from 'dom-to-image';
@@ -424,6 +425,7 @@ export default {
 
               if (payload.hasOwnProperty('status')) {
                 this.status = payload.status;
+                this.jsonresps += 'JSON Payload:\n' + JSON.stringify(payload, null, ' ') + '\n\n';
               }
 
               if (payload.hasOwnProperty('characteristic')) {
