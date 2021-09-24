@@ -7,6 +7,9 @@ const { Pool } = require('pg')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const postgresDbHandler = require("./routes/postgresDbHandler");
+var Client = require('azure-iothub').Client;
+var Message = require('azure-iot-common').Message;
+var connectionString = config.iothubconnectionstring;
 
 // set this to true to run set up queries for schema
 const dbsetup = true;
@@ -105,8 +108,12 @@ if (dbsetup) {
 
 function printResultFor(op) {
       return function printResult(err, res) {
-        if (err) console.log(op + ' error: ' + err.toString());
-        if (res) console.log(op + ' status: ' + res.constructor.name);
+        if (err) {
+            console.log(op + ' error: ' + err.toString());
+        }
+        if (res) {
+            console.log(op + ' status: ' + res.constructor.name);
+        }
       };
 }
 
@@ -115,6 +122,40 @@ function receiveFeedback(err, receiver){
         console.log('Feedback message:')
         console.log(msg.getData().toString('utf-8'));
       });
+}
+
+function sendC2d(targetdev, propdev, action, proptype) {
+    'use strict';
+
+    var targetDevice = targetdev;
+
+    var serviceClient = Client.fromConnectionString(connectionString);
+
+    serviceClient.open(function (err) {
+      if (err) {
+        console.error('Could not connect: ' + err.message);
+      } else {
+        console.log('Service client connected');
+        serviceClient.getFeedbackReceiver(receiveFeedback);
+        var message = new Message(JSON.stringify(action));
+        message.ack = 'full';
+        message.contentType = 'application/json';
+        if (proptype === "bleActions") {
+            message.properties.add('messageId', '12345678');
+            message.properties.add('contentType', 'application/json');
+            message.properties.add('messageType', 'bleActions');
+            message.properties.add('deviceIdentifier', propdev);
+        } else if (proptype === "characteristics") {
+            message.properties.add('version', '1');
+            message.properties.add('messageType', 'characteristics');
+            message.properties.add('deviceIdentifier', propdev);
+        }
+
+        //message.messageId = "My Message ID";
+        console.log('Sending message: ' + message.getData(), message);
+        serviceClient.send(targetDevice, message, printResultFor('send'));
+      }
+    });
 }
 
 app.use(cors())
@@ -129,34 +170,228 @@ app.get('/', function (req, res) {
     res.send('hello world');
 });
 
-// respond with "hello world" when a GET request is made to the homepage
-app.post('/southbound', function (req, res) {
-    'use strict';
-
+// done
+app.post('/southbound/connect', function (req, res) {
     const payload = JSON.parse(req.body.body);
 
-    var Client = require('azure-iothub').Client;
-    var Message = require('azure-iot-common').Message;
-    var connectionString = config.iothubconnectionstring;
-    var targetDevice = payload.dev;
+    let action = {
+        "actionType": "bleConnect",
+        "timeout": "30"
+    };
 
-    var serviceClient = Client.fromConnectionString(connectionString);
+    let properties = {
+        'messageId': '12345678',
+        'contentType': 'application/json',
+        'messageType': 'bleActions',
+        'deviceIdentifier': payload.dev
+    }
 
-    serviceClient.open(function (err) {
-      if (err) {
-        console.error('Could not connect: ' + err.message);
-      } else {
-        console.log('Service client connected');
-        serviceClient.getFeedbackReceiver(receiveFeedback);
-        var message = new Message(JSON.stringify(payload.jsonCommands));
-        message.ack = 'full';
-        message.messageId = "My Message ID";
-        console.log('Sending message: ' + message.getData());
-        serviceClient.send(targetDevice, message, printResultFor('send'));
+    sendC2d(payload.ap, payload.dev, action, "bleActions");
 
-        res.send({data: "complete"});
-      }
-    });
+    res.send({payload: action, props: properties});
+})
+
+// done
+app.post('/southbound/disconnect', function (req, res) {
+    const payload = JSON.parse(req.body.body);
+
+    let action = {
+        "actionType": "bleDisconnect",
+        "timeout": "30"
+    };
+
+    let properties = {
+        'messageId': '12345678',
+        'contentType': 'application/json',
+        'messageType': 'bleActions',
+        'deviceIdentifier': payload.dev
+    }
+
+    sendC2d(payload.ap, payload.dev, action, "bleActions");
+
+    res.send({payload: action, props: properties});
+})
+
+
+app.post('/southbound/read', function (req, res) {
+    const payload = JSON.parse(req.body.body);
+
+    let action = {
+        "actionType": "bleGattRead",
+        "serviceUuid": payload.serviceUuid,
+        "characteristicUuid": payload.characteristicUuid,
+        "timeout": 30
+    };
+
+    let properties = {
+        'messageId': '12345678',
+        'contentType': 'application/json',
+        'messageType': 'bleActions',
+        'deviceIdentifier': payload.dev
+    }
+
+    sendC2d(payload.ap, payload.dev, action, "bleActions");
+
+    res.send({payload: action, props: properties});
+})
+
+app.post('/southbound/writeWithoutResponse', function (req, res) {
+    const payload = JSON.parse(req.body.body);
+
+    let action = {
+        "actionType": "bleGattWrite",
+        "serviceUuid": payload.serviceUuid,
+        "characteristicUuid": payload.characteristicUuid,
+        "data": payload.data,
+        "timeout": 30
+    };
+
+    let properties = {
+        'messageId': '12345678',
+        'contentType': 'application/json',
+        'messageType': 'bleActions',
+        'deviceIdentifier': payload.dev
+    }
+
+    sendC2d(payload.ap, payload.dev, action, "bleActions");
+
+    res.send({payload: action, props: properties});
+})
+
+app.post('/southbound/writeWithResponse', function (req, res) {
+    const payload = JSON.parse(req.body.body);
+
+    let action = {
+        "actionType": "bleGattWriteWithResponse",
+        "serviceUuid": payload.serviceUuid,
+        "characteristicUuid": payload.characteristicUuid,
+        "data": payload.data,
+        "timeout": 30
+    };
+
+    let properties = {
+        'messageId': '12345678',
+        'contentType': 'application/json',
+        'messageType': 'bleActions',
+        'deviceIdentifier': payload.dev
+    }
+
+    sendC2d(payload.ap, payload.dev, action, "bleActions");
+
+    res.send({payload: action, props: properties});
+})
+
+app.post('/southbound/notify', function (req, res) {
+    const payload = JSON.parse(req.body.body);
+
+    let action = {
+        "actionType": "bleGattNotification",
+        "serviceUuid": payload.serviceUuid,
+        "characteristicUuid": payload.characteristicUuid,
+        "subscription": payload.subscription,
+        "timeout": 30
+    };
+
+    let properties = {
+        'messageId': '12345678',
+        'contentType': 'application/json',
+        'messageType': 'bleActions',
+        'deviceIdentifier': payload.dev
+    }
+
+    sendC2d(payload.ap, payload.dev, action, "bleActions");
+
+    res.send({payload: action, props: properties});
+})
+
+app.post('/southbound/indicate', function (req, res) {
+    const payload = JSON.parse(req.body.body);
+
+    let action = {
+        "actionType": "bleGattIndication",
+        "serviceUuid": payload.serviceUuid,
+        "characteristicUuid": payload.characteristicUuid,
+        "subscription": payload.subscription,
+        "timeout": 30
+    };
+
+    let properties = {
+        'messageId': '12345678',
+        'contentType': 'application/json',
+        'messageType': 'bleActions',
+        'deviceIdentifier': payload.dev
+    }
+
+    sendC2d(payload.ap, payload.dev, action, "bleActions");
+
+    res.send({payload: action, props: properties});
+})
+
+app.post('/southbound/characteristicupdate', function (req, res) {
+    const payload = JSON.parse(req.body.body);
+
+    let action = {
+        "deviceMac": payload.dev,
+        "serviceUuid": payload.serviceUuid,
+        "characteristicUuid": payload.characteristicUuid,
+        "value": payload.value
+    };
+
+    let properties = {
+        'version': '1',
+        'messageType': 'characteristics',
+        'deviceIdentifier': payload.dev
+    };
+
+    sendC2d(payload.ap, payload.dev, action, "characteristics");
+
+    res.send({payload: action, props: properties});
+})
+
+app.post('/southbound/authenticate', function (req, res) {
+    const payload = JSON.parse(req.body.body);
+
+    let action = {
+        "actionType": "bleAuthenticate",
+        "method": payload.method,
+        "bonding": payload.bonding,
+        "passkey": payload.passkey,
+        "keyOwn": payload.keyown,
+        "keyOob": payload.keyoob,
+        "timeout": 30
+    };
+
+    let properties = {
+        'messageId': '12345678',
+        'contentType': 'application/json',
+        'messageType': 'bleActions',
+        'deviceIdentifier': payload.dev
+    };
+
+    sendC2d(payload.ap, payload.dev, action, "bleActions");
+
+    res.send({payload: action, props: properties});
+})
+
+app.post('/southbound/encrypt', function (req, res) {
+    const payload = JSON.parse(req.body.body);
+
+    let action = {
+        "actionType": "bleEncrypt",
+        "bondingKey": payload.bondingkey,
+        "timeout": 30
+    };
+
+    let properties = {
+        'messageId': '12345678',
+        'contentType': 'application/json',
+        'messageType': 'bleActions',
+        'deviceIdentifier': payload.dev
+    };
+
+    sendC2d(payload.ap, payload.dev, action, "bleActions");
+
+    res.send({payload: action, props: properties});
 })
 
 app.get('/tabledata/:type', (req, res, next) => pgHandler.getAllData(req, res).catch(next))
@@ -170,6 +405,7 @@ app.get('/usbprofile', (req, res, next) => pgHandler.getUsbProfile(req, res).cat
 app.post('/chart', (req, res, next) => pgHandler.getChartData(req, res).catch(next))
 app.post('/tsdata', (req, res, next) => pgHandler.getTableData(req, res).catch(next))
 app.post('/avgrssi', (req, res, next) => pgHandler.getAvgRssi(req, res).catch(next))
+app.post('/avgrssible', (req, res, next) => pgHandler.getAvgRssiBle(req, res).catch(next))
 
 
 // catch 404 and forward to error handler

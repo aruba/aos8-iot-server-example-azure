@@ -173,12 +173,25 @@ class postgresDbHandler {
 
    async getAvgRssi(req, res) {
      const payload = JSON.parse(req.body.body);
-     let tmp = [];
 
-     var array_of_promises = [], array_of_results = []
+     var array_of_promises = [], array_of_results = [];
      payload.devs.forEach( item => {
        let tmpq = `SELECT AVG(rssi)::numeric(10,2) FROM tsdatahypertable WHERE device = '` + item.name + `' AND ap = '` + payload.ap + `';`;
        array_of_promises.push(this.query(tmpq, item.name));
+     });
+     array_of_results = await Promise.all(array_of_promises);
+
+     res.send({data: array_of_results});
+   }
+
+   async getAvgRssiBle(req, res) {
+     const payload = JSON.parse(req.body.body);
+
+     var array_of_promises = [], array_of_results = [];
+     payload.aps.forEach( item => {
+         console.log("backend", item);
+       let tmpq = `SELECT AVG(rssi)::numeric(10,2) FROM tsdatahypertable WHERE device = '` + payload.dev + `' AND ap = '` + item + `';`;
+       array_of_promises.push(this.query(tmpq, item));
      });
      array_of_results = await Promise.all(array_of_promises);
 

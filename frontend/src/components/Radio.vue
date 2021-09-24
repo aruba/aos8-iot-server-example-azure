@@ -1,5 +1,6 @@
 <template>
   <div style="background: whitesmoke; width: 100%;" v-if="show">
+     <loading-overlay :active="isLoading" :is-full-page="fullPage" :loader="loader" />
       <div style="display: flex;">
           <div style="margin-left:10px; margin-right: 80px; margin-top: 75px">
             <h1 class="has-text-weight-bold subtitle">Radio {{selectedRadio}}</h1>
@@ -25,11 +26,15 @@ export default {
       firmware: '',
       health: '',
       external: '',
+      isLoading: false,
+      fullPage: false,
+      loader: 'dots',
       show: false,
     };
   },
   methods: {
     showRadio(dev) {
+      this.isLoading = true;
       this.selectedRadio = dev;
 
       axios.get("http://127.0.0.1:3000/radioprofile?dev=" + this.selectedRadio, {
@@ -45,6 +50,7 @@ export default {
         this.firmware = tmpdata.firmware;
         this.health = tmpdata.last_health_status;
         this.external = tmpdata.external;
+        this.isLoading = false;
       });
 
     }

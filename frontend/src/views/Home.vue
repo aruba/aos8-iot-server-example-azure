@@ -1,7 +1,7 @@
 <template id="main">
   <div>
-    <div>
-        <h1 style="font-size: xx-large; color: azure">Aos8 Azure IoT-Hub Server Example</h1>
+    <div style="margin-left: 30px; margin-top: 30px;">
+
     </div>
 
     <div style="display: flex; justify-content: center; align-items: center; margin-top: 100px">

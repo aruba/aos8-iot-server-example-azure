@@ -6,7 +6,6 @@
         <span v-else>Upload JSON Document</span>
       </div>
       <input type="file" @change="handleFileChange"/>
-
     </label>
 
     <br>
