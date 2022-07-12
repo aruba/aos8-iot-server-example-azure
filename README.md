@@ -87,7 +87,10 @@ $$ LANGUAGE plpgsql;
             - CREATE TRIGGER ble_table_trigger AFTER INSERT ON tsdatahypertable
 FOR EACH ROW EXECUTE PROCEDURE notify_trigger();
 
-4. Set Up IoT Devices, Azure IoT Hub, and Azure DPS
+4. Set Up IoT Devices, Azure IoT Hub, and Azure DPS (your Azure IoT Solution)
+    - see: documentation/Azure IoTHub Integration User Guide.pdf
+    - see: documentation/Azure IoT Central Integration User Guide.pdf
+
 5. Deploy to Azure
     - Create a .env file locally in project root (ex: echo -e "IotHubConnectionString='xxxxxxxxxxxxxxxxxx'\nEventHubConsumerGroup='xxxxxxxxx'\nDBHOST='xxxxxx.postgres.database.azure.com'\nDBUSER='xxxxxxx@xxxxxxx'\nDBPASSWORD='xxxxxxx'\nDATABASE='xxxxxxx'" > .env )
 format:
