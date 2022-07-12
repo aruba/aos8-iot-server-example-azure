@@ -79,8 +79,8 @@ This project is a detailed yet simple to use demo application meant to provide a
             -  CREATE FUNCTION notify_trigger() RETURNS trigger AS $$
 DECLARE
 BEGIN
-    &nbsp; &nbsp; &nbsp; PERFORM pg_notify('new_azurepgmsg', row_to_json(NEW)::text);
-    &nbsp; &nbsp; &nbsp; RETURN new;
+PERFORM pg_notify('new_azurepgmsg', row_to_json(NEW)::text);
+RETURN new;
 END;
 $$ LANGUAGE plpgsql;
     
