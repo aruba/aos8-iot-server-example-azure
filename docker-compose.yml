@@ -1,3 +1,5 @@
+# Copyright 2022 Hewlett Packard Enterprise Development LP.
+
 version: '3'
 services:
   app-backend:

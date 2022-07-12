@@ -1,3 +1,7 @@
+/* 
+ * Copyright 2022 Hewlett Packard Enterprise Development LP. 
+ */
+
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'

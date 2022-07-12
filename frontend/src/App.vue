@@ -1,3 +1,7 @@
+<!-- 
+  Copyright 2022 Hewlett Packard Enterprise Development LP. 
+-->
+
 <template>
   <div id="app" class="has-background-grey">
     <Navbar></Navbar>

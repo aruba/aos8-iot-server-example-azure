@@ -1,3 +1,7 @@
+/* 
+ * Copyright 2022 Hewlett Packard Enterprise Development LP. 
+ */
+
 import Vue from 'vue'
 import vuetify from '@/plugins/vuetify' // path to vuetify export
 import Vuex from 'vuex'

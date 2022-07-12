@@ -1,3 +1,7 @@
+<!-- 
+  Copyright 2022 Hewlett Packard Enterprise Development LP. 
+-->
+
 <template>
   <div style="background: whitesmoke; width: 100%">
     <div style="margin-top: 50px; margin-bottom: 25px; margin-left: 50px;">

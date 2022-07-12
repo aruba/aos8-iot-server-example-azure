@@ -1,3 +1,7 @@
+<!-- 
+  Copyright 2022 Hewlett Packard Enterprise Development LP. 
+-->
+
 <template>
     <b-navbar class="is-dark">
         <template #brand>

@@ -1,11 +1,12 @@
+# Copyright 2022 Hewlett Packard Enterprise Development LP.
+
 #!/bin/bash
 
-### !!IMPORTANT - Script currently does not work (is incomplete), follow steps on confluence page instead!! ###
+### !!IMPORTANT - Script currently does not work (is incomplete), follow steps on README instead!! ###
 # TODO needs to be to fixed before working:
 #   - Figure out how to replace values in docker-compose yaml file
 #   - make sure docker version is up to date
 #   - change docker login azure with --tenant-id flag set 
-#   - 
 
 # Dependencies
 # - Azure CLI

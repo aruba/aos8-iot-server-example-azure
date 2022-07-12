@@ -1,3 +1,7 @@
+/* 
+ * Copyright 2022 Hewlett Packard Enterprise Development LP. 
+ */
+
 // src/plugins/vuetify.js
 
 import Vue from 'vue'

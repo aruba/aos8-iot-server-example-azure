@@ -1,3 +1,7 @@
+/* 
+ * Copyright 2022 Hewlett Packard Enterprise Development LP. 
+ */
+
 const config = require('./config')
 const express = require('express')
 const path = require('path')

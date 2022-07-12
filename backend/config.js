@@ -1,5 +1,8 @@
-const config = {};
+/* 
+ * Copyright 2022 Hewlett Packard Enterprise Development LP. 
+ */
 
+const config = {};
 
 /* IoTHub required config variables */
 // your IotHub Connection String

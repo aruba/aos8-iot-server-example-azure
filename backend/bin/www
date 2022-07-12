@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+/* 
+ * Copyright 2022 Hewlett Packard Enterprise Development LP. 
+ */
+
 /**
  * Module dependencies.
  */

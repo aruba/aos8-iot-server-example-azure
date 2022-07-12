@@ -1,3 +1,7 @@
+<!-- 
+  Copyright 2022 Hewlett Packard Enterprise Development LP. 
+-->
+
 <template>
   <v-app id="inspire" class="has-background-grey">
     <div style="display: flex;">
