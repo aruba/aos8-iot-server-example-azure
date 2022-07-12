@@ -27,15 +27,15 @@ This project is a detailed yet simple to use demo application meant to provide a
 ## Tutorial: Run Web App on Azure
 **Pre-requisites**
 1. Install/update to latest version Azure CLI and Docker engine
--- Please make sure that azure cli and docker engine are installed and/or updated to the most recent version
--- Azure CLI installation: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
--- Docker engine: https://docs.docker.com/get-docker/ 
+    - Please make sure that azure cli and docker engine are installed and/or updated to the most recent version
+    - Azure CLI installation: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
+    - Docker engine: https://docs.docker.com/get-docker/ 
 2. An active Azure subcription is required
 3. Ensure Docker Engine is running
 
 **Setup using Azure Portal and Command Line**
 1. Create azure database for postgres server
-    - **NOTE**: telemetry scale requirements might affect web app functionality if there is a resource constraint on the server (see: troubleshooting)
+    - **NOTE**: telemetry scale requirements might affect web app functionality if there is a resource constraint on the server (see: troubleshooting) See: https://docs.microsoft.com/en-us/azure/postgresql/single-server/concepts-limits
     - Login to azure portal
     - search for and click on resource "Azure Database for PostgreSQL servers"
     - select create
@@ -87,7 +87,10 @@ $$ LANGUAGE plpgsql;
             - CREATE TRIGGER ble_table_trigger AFTER INSERT ON tsdatahypertable
 FOR EACH ROW EXECUTE PROCEDURE notify_trigger();
 
-4. Set Up IoT Devices, Azure IoT Hub, and Azure DPS
+4. Set Up IoT Devices, Azure IoT Hub, and Azure DPS (your Azure IoT Solution)
+    - see: documentation/Azure IoTHub Integration User Guide.pdf
+    - see: documentation/Azure IoT Central Integration User Guide.pdf
+
 5. Deploy to Azure
     - Create a .env file locally in project root (ex: echo -e "IotHubConnectionString='xxxxxxxxxxxxxxxxxx'\nEventHubConsumerGroup='xxxxxxxxx'\nDBHOST='xxxxxx.postgres.database.azure.com'\nDBUSER='xxxxxxx@xxxxxxx'\nDBPASSWORD='xxxxxxx'\nDATABASE='xxxxxxx'" > .env )
 format:
