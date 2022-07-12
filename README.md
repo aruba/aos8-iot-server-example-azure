@@ -35,7 +35,7 @@ This project is a detailed yet simple to use demo application meant to provide a
 
 **Setup using Azure Portal and Command Line**
 1. Create azure database for postgres server
-    - **NOTE**: telemetry scale requirements might affect web app functionality if there is a resource constraint on the server (see: troubleshooting)
+    - **NOTE**: telemetry scale requirements might affect web app functionality if there is a resource constraint on the server (see: troubleshooting) See: https://docs.microsoft.com/en-us/azure/postgresql/single-server/concepts-limits
     - Login to azure portal
     - search for and click on resource "Azure Database for PostgreSQL servers"
     - select create
