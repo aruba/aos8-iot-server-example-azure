@@ -27,9 +27,9 @@ This project is a detailed yet simple to use demo application meant to provide a
 ## Tutorial: Run Web App on Azure
 **Pre-requisites**
 1. Install/update to latest version Azure CLI and Docker engine
--- Please make sure that azure cli and docker engine are installed and/or updated to the most recent version
--- Azure CLI installation: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
--- Docker engine: https://docs.docker.com/get-docker/ 
+    - Please make sure that azure cli and docker engine are installed and/or updated to the most recent version
+    - Azure CLI installation: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
+    - Docker engine: https://docs.docker.com/get-docker/ 
 2. An active Azure subcription is required
 3. Ensure Docker Engine is running
 
